@@ -25,6 +25,9 @@ npm run build
 
 # Preview the production build
 npm run preview
+
+# Type-check the project
+npm run type-check
 ```
 
 ## AI Tool Usage

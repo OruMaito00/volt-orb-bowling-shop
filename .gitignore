@@ -36,6 +36,9 @@ Thumbs.db
 # Test coverage
 coverage/
 
+# TypeScript build info
+*.tsbuildinfo
+
 # Agent skills lock file (private, not part of the project)
 skills-lock.json
 
