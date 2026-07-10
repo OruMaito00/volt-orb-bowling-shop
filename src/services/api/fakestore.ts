@@ -20,38 +20,36 @@ export interface LoginResponse {
 
 const BASE_URL = 'https://fakestoreapi.com'
 
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, options)
+  if (!res.ok) {
+    throw new Error(`API ${res.status}: ${res.statusText}`)
+  }
+  return res.json() as Promise<T>
+}
+
 export const fakestoreApi = {
-  async getProducts(): Promise<FakeStoreProduct[]> {
-    const res = await fetch(`${BASE_URL}/products`)
-    if (!res.ok) throw new Error('Failed to fetch products')
-    return res.json()
+  getProducts(): Promise<FakeStoreProduct[]> {
+    return request<FakeStoreProduct[]>('/products')
   },
 
-  async getProduct(id: number): Promise<FakeStoreProduct> {
-    const res = await fetch(`${BASE_URL}/products/${id}`)
-    if (!res.ok) throw new Error('Failed to fetch product')
-    return res.json()
+  getProduct(id: number): Promise<FakeStoreProduct> {
+    return request<FakeStoreProduct>(`/products/${id}`)
   },
 
-  async getCategories(): Promise<Category[]> {
-    const res = await fetch(`${BASE_URL}/products/categories`)
-    if (!res.ok) throw new Error('Failed to fetch categories')
-    return res.json()
+  getCategories(): Promise<Category[]> {
+    return request<Category[]>('/products/categories')
   },
 
-  async getProductsByCategory(cat: string): Promise<FakeStoreProduct[]> {
-    const res = await fetch(`${BASE_URL}/products/category/${cat}`)
-    if (!res.ok) throw new Error('Failed to fetch products by category')
-    return res.json()
+  getProductsByCategory(cat: string): Promise<FakeStoreProduct[]> {
+    return request<FakeStoreProduct[]>(`/products/category/${cat}`)
   },
 
-  async login(payload: LoginPayload): Promise<LoginResponse> {
-    const res = await fetch(`${BASE_URL}/auth/login`, {
+  login(payload: LoginPayload): Promise<LoginResponse> {
+    return request<LoginResponse>('/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
-    if (!res.ok) throw new Error('Login failed')
-    return res.json()
   },
 }
