@@ -4,32 +4,50 @@ import { ref, computed } from 'vue'
 export interface CartItem {
   productId: number
   quantity: number
+  price: number // unit price snapshot at add time
 }
 
 export const useCartStore = defineStore('cart', () => {
-  const items = ref<CartItem[]>([])
+  // Restore from localStorage so users don't lose their cart on refresh
+  const stored = localStorage.getItem('cart_items')
+  const items = ref<CartItem[]>(stored ? JSON.parse(stored) : [])
 
+  // Total number of items (sum of all quantities)
   const itemCount = computed(() =>
     items.value.reduce((sum, item) => sum + item.quantity, 0),
   )
 
-  const totalPrice = computed(() => items.value.length)
+  // Total cart value (sum of price × quantity per item)
+  const totalPrice = computed(() =>
+    items.value.reduce((sum, item) => sum + item.price * item.quantity, 0),
+  )
 
-  function addToCart(productId: number) {
+  // Helper: sync items array to localStorage after every mutation
+  function persist() {
+    localStorage.setItem('cart_items', JSON.stringify(items.value))
+  }
+
+  // Adds a product to the cart (increments quantity if it already exists)
+  function addToCart(productId: number, price: number) {
     const existing = items.value.find((item) => item.productId === productId)
     if (existing) {
       existing.quantity++
     } else {
-      items.value.push({ productId, quantity: 1 })
+      items.value.push({ productId, quantity: 1, price })
     }
+    persist()
   }
 
+  // Removes a product entirely from the cart
   function removeFromCart(productId: number) {
     items.value = items.value.filter((item) => item.productId !== productId)
+    persist()
   }
 
+  // Empties the cart
   function clearCart() {
     items.value = []
+    persist()
   }
 
   return { items, itemCount, totalPrice, addToCart, removeFromCart, clearCart }
