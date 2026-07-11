@@ -1,3 +1,4 @@
+// Surface card with rounded corners and subtle elevation
 @mixin card-layout {
   background-color: var(--color-surface);
   border-radius: var(--radius-md);
@@ -5,15 +6,33 @@
   overflow: hidden;
 }
 
+// Auto-fill product grid (min 220px columns)
 @mixin grid-spacing {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: var(--spacing-md);
 }
 
+// Base type scale
 @mixin typography-scale {
   h1 { font-size: 2rem; font-weight: 700; }
   h2 { font-size: 1.5rem; font-weight: 600; }
   h3 { font-size: 1.25rem; font-weight: 600; }
   p  { font-size: 1rem; line-height: 1.6; }
+}
+
+// Keyboard focus ring for interactive elements
+@mixin focus-ring {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+// Mobile-first responsive breakpoints
+// Usage: @include respond-to('tablet') { ... }
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == 'tablet' {
+    @media (min-width: 640px) { @content; }
+  } @else if $breakpoint == 'desktop' {
+    @media (min-width: 1024px) { @content; }
+  }
 }

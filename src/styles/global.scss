@@ -1,6 +1,7 @@
 @use 'variables';
 @use 'mixins';
 
+// Reset
 *,
 *::before,
 *::after {
@@ -9,6 +10,7 @@
   padding: 0;
 }
 
+// Base body
 body {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--color-bg);
@@ -22,6 +24,7 @@ body {
   min-height: 100vh;
 }
 
+// Links
 a {
   color: var(--color-primary);
   text-decoration: none;
@@ -31,7 +34,27 @@ a {
   }
 }
 
+// Buttons
 button {
   cursor: pointer;
   font-family: inherit;
+}
+
+// Keyboard focus — visible only for keyboard users, not mouse clickers
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+// Fluid images — prevent overflow in product cards
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+// Container utility — centered content with max width
+.container {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
 }

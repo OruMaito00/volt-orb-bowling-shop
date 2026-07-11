@@ -1,3 +1,4 @@
+// Light theme (default) — bowling pin white with red stripe
 :root {
   --color-primary: #e32332;
   --color-secondary: #0a6db1;
@@ -7,17 +8,45 @@
   --color-text-muted: #6b7280;
   --color-border: #e5e7eb;
 
+  // Accessibility
+  --color-focus: #e32332;
+
+  // Layout
+  --header-height: 4rem;
+  --content-max-width: 1200px;
+
+  // Spacing scale
   --spacing-xs: 0.5rem;
   --spacing-sm: 0.75rem;
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --spacing-xl: 2.5rem;
 
+  // Border radius
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 16px;
 
+  // Box shadows (elevation)
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+// Dark theme — bowling alley at night
+// Activated by setting data-theme="dark" on <html> (Phase 2 ThemeToggle)
+[data-theme='dark'] {
+  --color-primary: #ff4757;
+  --color-secondary: #3b9ee6;
+  --color-bg: #0d0d1a;
+  --color-surface: #1a1a2e;
+  --color-text: #f5f5f7;
+  --color-text-muted: #9ca3af;
+  --color-border: #2d2d44;
+
+  --color-focus: #ff4757;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
