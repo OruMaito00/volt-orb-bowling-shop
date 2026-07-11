@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { FakeStoreProduct, Category } from '@/services/api/fakestore'
 import { fakestoreApi } from '@/services/api/fakestore'
+import { bowlingProducts, BOWLING_CATEGORY } from '@/data/bowlingProducts'
 
 export const useProductsStore = defineStore('products', () => {
   // Product list shown on the home grid
@@ -14,12 +15,13 @@ export const useProductsStore = defineStore('products', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  // Fetches all categories for the header nav
+  // Fetches API categories and injects our local bowling category
   async function fetchCategories() {
     loading.value = true
     error.value = null
     try {
-      categories.value = await fakestoreApi.getCategories()
+      const apiCategories = await fakestoreApi.getCategories()
+      categories.value = [...apiCategories, BOWLING_CATEGORY]
     } catch {
       error.value = 'Failed to load categories'
     } finally {
@@ -27,12 +29,13 @@ export const useProductsStore = defineStore('products', () => {
     }
   }
 
-  // Fetches all products (no category filter)
+  // Fetches all API products and merges with local bowling products
   async function fetchProducts() {
     loading.value = true
     error.value = null
     try {
-      products.value = await fakestoreApi.getProducts()
+      const apiProducts = await fakestoreApi.getProducts()
+      products.value = [...bowlingProducts, ...apiProducts]
     } catch {
       error.value = 'Failed to load products'
     } finally {
@@ -41,7 +44,12 @@ export const useProductsStore = defineStore('products', () => {
   }
 
   // Fetches products filtered by a specific category
+  // Bowling category uses local data only — no API call needed
   async function fetchProductsByCategory(cat: string) {
+    if (cat === BOWLING_CATEGORY) {
+      products.value = bowlingProducts
+      return
+    }
     loading.value = true
     error.value = null
     try {

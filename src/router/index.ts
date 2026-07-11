@@ -28,7 +28,6 @@ const routes: RouteRecordRaw[] = [
     path: '/cart',
     name: 'cart',
     component: () => import('@/modules/cart/CartView.vue'),
-    meta: { requiresAuth: true },
   },
   {
     path: '/wishlist',

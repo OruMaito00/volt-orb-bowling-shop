@@ -1,11 +1,202 @@
 <script setup lang="ts">
+import { ref, watch, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { fakestoreApi } from '@/services/api/fakestore'
+import type { FakeStoreProduct } from '@/services/api/fakestore'
+import { useCartStore } from '@/stores/cart'
+import { isBowlingProduct } from '@/data/bowlingProducts'
+
+const props = defineProps<{
+  id: number
+}>()
+
+const router = useRouter()
+const cart = useCartStore()
+
+const product = ref<FakeStoreProduct | null>(null)
+const loading = ref(false)
+const error = ref<string | null>(null)
+
+async function fetchProduct() {
+  loading.value = true
+  error.value = null
+  try {
+    // Check local bowling products first — instant, no API call
+    const local = isBowlingProduct(props.id)
+    if (local) {
+      product.value = local
+      return
+    }
+    // Not a bowling product — fetch from the API
+    product.value = await fakestoreApi.getProduct(props.id)
+  } catch {
+    error.value = 'Failed to load product'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(fetchProduct)
+
+// Router reuses the same component for /products/1 → /products/2
+// so we watch the id prop and re-fetch when it changes
+watch(() => props.id, fetchProduct)
+
+function addToCart() {
+  if (product.value) {
+    cart.addToCart(product.value.id, product.value.price)
+  }
+}
+
+function goBack() {
+  router.back()
+}
 </script>
 
 <template>
-  <section class="product-detail">
-    <p>Product detail view</p>
+  <section class="product-detail" v-if="product">
+    <button class="product-detail__back" @click="goBack">&larr; Back</button>
+    <div class="product-detail__layout">
+      <div class="product-detail__image">
+        <img :src="product.image" :alt="product.title" />
+      </div>
+      <div class="product-detail__info">
+        <p class="product-detail__category">{{ product.category }}</p>
+        <h1 class="product-detail__title">{{ product.title }}</h1>
+        <p class="product-detail__price">${{ product.price.toFixed(2) }}</p>
+        <p class="product-detail__desc">{{ product.description }}</p>
+        <button class="product-detail__cta" @click="addToCart">Add to cart</button>
+      </div>
+    </div>
   </section>
+
+  <p v-if="loading" class="product-detail__status">Loading...</p>
+  <p v-if="error" class="product-detail__error">{{ error }}</p>
 </template>
 
 <style scoped lang="scss">
+@use '@/styles/mixins' as m;
+
+.product-detail {
+  padding-top: var(--spacing-lg);
+}
+
+.product-detail__back {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  margin-bottom: var(--spacing-md);
+  padding: 0;
+
+  &:hover {
+    color: var(--color-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.product-detail__layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+
+  @include m.respond-to('desktop') {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+.product-detail__image {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+
+  @include m.respond-to('desktop') {
+    flex: 0 0 400px;
+  }
+
+  img {
+    max-width: 100%;
+    max-height: 400px;
+    object-fit: contain;
+  }
+}
+
+.product-detail__info {
+  flex: 1;
+}
+
+.product-detail__category {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.product-detail__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+}
+
+.product-detail__price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.product-detail__desc {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-lg);
+}
+
+.product-detail__cta {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm) var(--spacing-xl);
+  font-size: 1rem;
+  font-weight: 600;
+  width: 100%;
+  transition: opacity 0.15s;
+
+  @include m.respond-to('desktop') {
+    width: auto;
+  }
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.product-detail__status,
+.product-detail__error {
+  text-align: center;
+  padding: var(--spacing-xl) 0;
+  color: var(--color-text-muted);
+}
+
+.product-detail__error {
+  color: var(--color-primary);
+}
 </style>
