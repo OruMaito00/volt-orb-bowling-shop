@@ -85,6 +85,17 @@ describe('Auth Store', () => {
       expect(localStorage.getItem('auth_token')).toBeNull()
       expect(localStorage.getItem('auth_username')).toBeNull()
     })
+
+    it('is a no-op (and does not throw) when called from a logged-out state', () => {
+      const auth = useAuthStore()
+
+      expect(() => auth.logout()).not.toThrow()
+      expect(auth.token).toBeNull()
+      expect(auth.username).toBeNull()
+      expect(auth.isAuthenticated).toBe(false)
+      expect(localStorage.getItem('auth_token')).toBeNull()
+      expect(localStorage.getItem('auth_username')).toBeNull()
+    })
   })
 
   //isAuthenticated
@@ -126,6 +137,17 @@ describe('Auth Store', () => {
 
       expect(localStorage.getItem('auth_token')).toBeNull()
     })
+
+    it('leaves username and its localStorage entry untouched', () => {
+      const auth = useAuthStore()
+      auth.login('my-token', 'voltorb')
+
+      auth.setToken('replaced-token')
+
+      expect(auth.token).toBe('replaced-token')
+      expect(auth.username).toBe('voltorb')
+      expect(localStorage.getItem('auth_username')).toBe('voltorb')
+    })
   })
 
   //re-login
@@ -139,6 +161,18 @@ describe('Auth Store', () => {
       expect(auth.token).toBe('second-token')
       expect(auth.username).toBe('second-user')
       expect(localStorage.getItem('auth_token')).toBe('second-token')
+    })
+
+    it('preserves the existing username when re-login omits one', () => {
+      const auth = useAuthStore()
+      auth.login('first-token', 'first-user')
+
+      auth.login('second-token')
+
+      expect(auth.token).toBe('second-token')
+      expect(auth.username).toBe('first-user')
+      expect(localStorage.getItem('auth_token')).toBe('second-token')
+      expect(localStorage.getItem('auth_username')).toBe('first-user')
     })
   })
 })

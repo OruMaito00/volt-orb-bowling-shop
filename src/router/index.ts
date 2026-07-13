@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import type { RouteRecordRaw } from 'vue-router'
+import type { RouteLocationNormalized, RouteLocationRaw, RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
-const routes: RouteRecordRaw[] = [
+export const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
@@ -42,11 +42,13 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to) => {
+export function authGuard(to: RouteLocationNormalized): RouteLocationRaw | void {
   const auth = useAuthStore()
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
-})
+}
+
+router.beforeEach(authGuard)
 
 export default router
