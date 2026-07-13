@@ -10,6 +10,7 @@ const auth = useAuthStore()
 
 const username = ref('')
 const password = ref('')
+const showPassword = ref(false)
 const loading = ref(false)
 const error = ref<string | null>(null)
 
@@ -45,7 +46,7 @@ async function handleLogin() {
     <form class="login__form" @submit.prevent="handleLogin">
       <h1 class="login__title">Sign in</h1>
       <p class="login__hint">
-        Demo: <code>jhon</code> / <code>D38Dfff33</code>
+        Demo: <code>mor_2314</code> / <code>83r5^_</code> &nbsp;or&nbsp; <code>johnd</code> / <code>m38rmF$</code>
       </p>
 
       <label class="login__field">
@@ -55,7 +56,21 @@ async function handleLogin() {
 
       <label class="login__field">
         <span>Password</span>
-        <input v-model="password" type="password" autocomplete="current-password" />
+        <div class="login__input-wrap">
+          <input
+            v-model="password"
+            :type="showPassword ? 'text' : 'password'"
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="login__toggle"
+            @click="showPassword = !showPassword"
+            :aria-label="showPassword ? 'Hide password' : 'Show password'"
+          >
+            {{ showPassword ? '◉' : '◎' }}
+          </button>
+        </div>
       </label>
 
       <p v-if="error" class="login__error">{{ error }}</p>
@@ -126,6 +141,37 @@ async function handleLogin() {
       outline: 2px solid var(--color-primary);
       outline-offset: -1px;
     }
+  }
+}
+
+.login__input-wrap {
+  position: relative;
+
+  input {
+    width: 100%;
+    padding-right: 2.5rem;
+  }
+}
+
+.login__toggle {
+  position: absolute;
+  right: var(--spacing-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.125rem;
+  padding: var(--spacing-xs);
+  line-height: 1;
+
+  &:hover {
+    color: var(--color-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
   }
 }
 

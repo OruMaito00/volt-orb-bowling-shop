@@ -83,7 +83,9 @@ function handleLogout() {
 
         <!-- Auth links -->
         <template v-if="auth.isAuthenticated">
-          <router-link to="/wishlist" class="header__link">Wishlist</router-link>
+          <router-link to="/wishlist" class="header__heart" aria-label="Wishlist">
+            &#9829;
+          </router-link>
           <button class="header__link header__logout" @click="handleLogout">
             Logout
           </button>
@@ -219,6 +221,18 @@ function handleLogout() {
 }
 
 // Auth links
+.header__heart {
+  font-size: 1.25rem;
+  color: var(--color-text);
+  text-decoration: none;
+  line-height: 1;
+
+  &:hover {
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+}
+
 .header__link {
   font-size: 0.875rem;
   color: var(--color-text);
