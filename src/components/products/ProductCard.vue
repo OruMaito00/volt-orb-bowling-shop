@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import type { FakeStoreProduct } from '@/services/api/fakestore'
 import { useCartStore } from '@/stores/cart'
+import { showToast } from '@/composables/useToast'
 
 const props = defineProps<{
   product: FakeStoreProduct
@@ -16,6 +17,7 @@ function goToProduct() {
 
 function addToCart() {
   cart.addToCart(props.product.id, props.product.price)
+  showToast('Added to cart')
 }
 </script>
 
@@ -55,6 +57,7 @@ function addToCart() {
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  transition: box-shadow var(--duration-fast) var(--ease-standard);
 
   &:hover {
     box-shadow: var(--shadow-md);
@@ -123,10 +126,15 @@ function addToCart() {
   font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
-  transition: opacity 0.15s;
+  transition: opacity var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
 
   &:hover {
     opacity: 0.9;
+  }
+
+  &:active {
+    transform: scale(0.97);
   }
 
   &:focus-visible {

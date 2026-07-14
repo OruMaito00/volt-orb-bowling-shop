@@ -8,6 +8,7 @@ import { useWishlistStore } from '@/stores/wishlist'
 import { useAuthStore } from '@/stores/auth'
 import { isBowlingProduct } from '@/data/bowlingProducts'
 import BowlingBallViewer from '@/3d/BowlingBallViewer.vue'
+import { showToast } from '@/composables/useToast'
 
 const props = defineProps<{
   id: number
@@ -55,6 +56,7 @@ watch(() => props.id, fetchProduct)
 function addToCart() {
   if (product.value) {
     cart.addToCart(product.value.id, product.value.price)
+    showToast('Added to cart')
   }
 }
 
@@ -120,62 +122,66 @@ function handleDialogTab(event: KeyboardEvent) {
 </script>
 
 <template>
-  <section class="product-detail" v-if="product">
-    <button class="product-detail__back" @click="goBack">&larr; Back</button>
-    <div class="product-detail__layout">
-      <div class="product-detail__image">
-        <BowlingBallViewer
-          v-if="product.model3d"
-          :src="product.model3d"
-          :poster="product.image"
-          :alt="product.title"
-          :camera-position="{ x: 1, y: 4.0, z: 9.0 }"
-          :camera-target="{ x: 0, y: 0, z: 0 }"
-        />
-        <img v-else :src="product.image" :alt="product.title" />
-      </div>
-      <div class="product-detail__info">
-        <p class="product-detail__category">{{ product.category }}</p>
-        <h1 class="product-detail__title">{{ product.title }}</h1>
-        <p class="product-detail__price">${{ product.price.toFixed(2) }}</p>
-        <p class="product-detail__desc">{{ product.description }}</p>
-        <div class="product-detail__actions">
-          <button class="product-detail__cta" @click="addToCart">Add to cart</button>
-          <button
-            class="product-detail__wishlist"
-            :class="{ 'is-saved': product && wishlist.isInWishlist(product.id) }"
-            @click="toggleWishlist"
-            :aria-label="product && wishlist.isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'"
-          >
-            {{ product && wishlist.isInWishlist(product.id) ? '&#9829;' : '&#9825;' }}
-          </button>
+  <div class="product-view">
+    <section class="product-detail" v-if="product">
+      <button class="product-detail__back" @click="goBack">&larr; Back</button>
+      <div class="product-detail__layout">
+        <div class="product-detail__image">
+          <BowlingBallViewer
+            v-if="product.model3d"
+            :src="product.model3d"
+            :poster="product.image"
+            :alt="product.title"
+            :camera-position="{ x: 1, y: 4.0, z: 9.0 }"
+            :camera-target="{ x: 0, y: 0, z: 0 }"
+          />
+          <img v-else :src="product.image" :alt="product.title" />
+        </div>
+        <div class="product-detail__info">
+          <p class="product-detail__category">{{ product.category }}</p>
+          <h1 class="product-detail__title">{{ product.title }}</h1>
+          <p class="product-detail__price">${{ product.price.toFixed(2) }}</p>
+          <p class="product-detail__desc">{{ product.description }}</p>
+          <div class="product-detail__actions">
+            <button class="product-detail__cta" @click="addToCart">Add to cart</button>
+            <button
+              class="product-detail__wishlist"
+              :class="{ 'is-saved': product && wishlist.isInWishlist(product.id) }"
+              @click="toggleWishlist"
+              :aria-label="product && wishlist.isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'"
+            >
+              {{ product && wishlist.isInWishlist(product.id) ? '&#9829;' : '&#9825;' }}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <p v-if="loading" class="product-detail__status">Loading...</p>
-  <p v-if="error" class="product-detail__error">{{ error }}</p>
+    <p v-if="loading" class="product-detail__status">Loading...</p>
+    <p v-if="error" class="product-detail__error">{{ error }}</p>
 
-  <!-- Login required dialog -->
-  <div
-    v-if="showLoginPrompt"
-    class="login-prompt"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="login-prompt-title"
-    @click.self="closeLoginPrompt"
-    @keydown.escape="closeLoginPrompt"
-    @keydown.tab="handleDialogTab"
-  >
-    <div ref="dialogCardRef" class="login-prompt__card">
-      <p id="login-prompt-title" class="login-prompt__title">Login required</p>
-      <p class="login-prompt__message">You need to be signed in to save items to your wishlist.</p>
-      <div class="login-prompt__actions">
-        <button ref="loginPromptCancelRef" class="login-prompt__cancel" @click="closeLoginPrompt">Cancel</button>
-        <button class="login-prompt__login" @click="goToLogin">Sign in</button>
+    <!-- Login required dialog -->
+    <Transition name="modal">
+      <div
+        v-if="showLoginPrompt"
+        class="login-prompt"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="login-prompt-title"
+        @click.self="closeLoginPrompt"
+        @keydown.escape="closeLoginPrompt"
+        @keydown.tab="handleDialogTab"
+      >
+        <div ref="dialogCardRef" class="login-prompt__card">
+          <p id="login-prompt-title" class="login-prompt__title">Login required</p>
+          <p class="login-prompt__message">You need to be signed in to save items to your wishlist.</p>
+          <div class="login-prompt__actions">
+            <button ref="loginPromptCancelRef" class="login-prompt__cancel" @click="closeLoginPrompt">Cancel</button>
+            <button class="login-prompt__login" @click="goToLogin">Sign in</button>
+          </div>
+        </div>
       </div>
-    </div>
+    </Transition>
   </div>
 </template>
 
@@ -284,7 +290,7 @@ function handleDialogTab(event: KeyboardEvent) {
   font-size: 1rem;
   font-weight: 600;
   flex: 1;
-  transition: opacity 0.15s;
+  transition: opacity var(--duration-fast) var(--ease-standard);
 
   @include m.respond-to('desktop') {
     flex: 0 0 auto;
@@ -308,7 +314,7 @@ function handleDialogTab(event: KeyboardEvent) {
   font-size: 1.5rem;
   line-height: 1;
   color: var(--color-text-muted);
-  transition: color 0.15s, border-color 0.15s;
+  transition: color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
   flex-shrink: 0;
 
   &:hover {
@@ -347,6 +353,24 @@ function handleDialogTab(event: KeyboardEvent) {
   align-items: center;
   justify-content: center;
   z-index: 200;
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity var(--duration-normal) var(--ease-decel);
+
+  .login-prompt__card {
+    transition: transform var(--duration-normal) var(--ease-decel);
+  }
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+
+  .login-prompt__card {
+    transform: scale(0.96);
+  }
 }
 
 .login-prompt__card {

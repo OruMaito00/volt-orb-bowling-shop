@@ -44,7 +44,7 @@ function continueShopping() {
       <p v-if="loading" class="wishlist__status">Loading product details...</p>
       <p v-if="resolveError" class="wishlist__error">{{ resolveError }}</p>
 
-      <div class="wishlist__items">
+      <TransitionGroup name="list" tag="div" class="wishlist__items">
         <div
           v-for="id in wishlist.productIds"
           :key="id"
@@ -70,7 +70,7 @@ function continueShopping() {
             Remove
           </button>
         </div>
-      </div>
+      </TransitionGroup>
 
       <div class="wishlist__actions">
         <button class="wishlist__clear" @click="clearWishlist">Clear wishlist</button>
@@ -97,6 +97,16 @@ function continueShopping() {
   flex-direction: column;
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-lg);
+}
+
+// Wishlist item removal — fade + slide out so the list doesn't snap
+.list-leave-active {
+  transition: all var(--duration-slow) var(--ease-standard);
+}
+
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(-1rem);
 }
 
 .wishlist-item {
@@ -170,7 +180,7 @@ function continueShopping() {
   color: var(--color-text-muted);
   font-size: 0.75rem;
   padding: var(--spacing-xs);
-  transition: color 0.15s;
+  transition: color var(--duration-fast) var(--ease-standard);
 
   &:hover {
     color: var(--color-primary);
@@ -194,7 +204,7 @@ function continueShopping() {
   padding: var(--spacing-sm) var(--spacing-md);
   font-size: 0.875rem;
   color: var(--color-text-muted);
-  transition: border-color 0.15s;
+  transition: border-color var(--duration-fast) var(--ease-standard);
 
   &:hover {
     border-color: var(--color-primary);

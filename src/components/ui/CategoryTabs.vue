@@ -50,7 +50,7 @@ function select(cat: Category | null) {
   background-color: transparent;
   color: var(--color-text);
   font-size: 0.875rem;
-  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
 
   &:hover {
     border-color: var(--color-primary);

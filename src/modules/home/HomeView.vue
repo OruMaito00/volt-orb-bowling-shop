@@ -34,15 +34,19 @@ watch(() => route.query.category, load)
 <template>
   <section class="home">
     <h1 class="home__title">Shop</h1>
-    <p class="home__count" v-if="!products.loading">{{ products.products.length }} products</p>
 
-    <div class="home__grid">
-      <ProductCard
-        v-for="p in products.products"
-        :key="p.id"
-        :product="p"
-      />
-    </div>
+    <Transition name="grid-fade" mode="out-in">
+      <div v-if="!products.loading" :key="products.selectedCategory ?? 'all'">
+        <p class="home__count">{{ products.products.length }} products</p>
+        <div class="home__grid">
+          <ProductCard
+            v-for="p in products.products"
+            :key="p.id"
+            :product="p"
+          />
+        </div>
+      </div>
+    </Transition>
 
     <p v-if="products.loading" class="home__status">Loading products...</p>
     <p v-if="products.error" class="home__error">{{ products.error }}</p>
@@ -88,5 +92,16 @@ watch(() => route.query.category, load)
 
 .home__error {
   color: var(--color-primary);
+}
+
+// Category grid — fade out old, fade in new so switching doesn't snap
+.grid-fade-enter-active,
+.grid-fade-leave-active {
+  transition: opacity var(--duration-normal) var(--ease-standard);
+}
+
+.grid-fade-enter-from,
+.grid-fade-leave-to {
+  opacity: 0;
 }
 </style>

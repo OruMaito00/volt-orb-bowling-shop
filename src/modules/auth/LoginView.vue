@@ -190,7 +190,7 @@ async function handleLogin() {
   padding: var(--spacing-sm) var(--spacing-md);
   font-size: 1rem;
   font-weight: 600;
-  transition: opacity 0.15s;
+  transition: opacity var(--duration-fast) var(--ease-standard);
 
   &:hover {
     opacity: 0.9;

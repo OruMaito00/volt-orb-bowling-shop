@@ -14,6 +14,17 @@ const cart = useCartStore()
 const auth = useAuthStore()
 
 const isMenuOpen = ref(false)
+const cartPulsing = ref(false)
+
+// Pulse the cart badge when an item is added
+watch(() => cart.itemCount, (newCount, oldCount) => {
+  if (newCount > (oldCount ?? 0)) {
+    cartPulsing.value = true
+    setTimeout(() => {
+      cartPulsing.value = false
+    }, 400)
+  }
+})
 
 // Fetch categories on mount so the nav has something to show
 onMounted(() => {
@@ -78,7 +89,7 @@ function handleLogout() {
         <!-- Cart with counter badge -->
         <router-link to="/cart" class="header__cart" aria-label="Shopping cart">
           🛒
-          <span class="header__cart-count">{{ cart.itemCount }}</span>
+          <span class="header__cart-count" :class="{ 'is-pulsing': cartPulsing }">{{ cart.itemCount }}</span>
         </router-link>
 
         <!-- Auth links -->
@@ -218,6 +229,11 @@ function handleLogout() {
   align-items: center;
   justify-content: center;
   padding: 0 4px;
+  transition: transform var(--duration-normal) var(--ease-decel);
+
+  &.is-pulsing {
+    transform: scale(1.25);
+  }
 }
 
 // Auth links
