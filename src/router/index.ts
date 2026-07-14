@@ -17,7 +17,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/products/:id',
     name: 'product-detail',
     component: () => import('@/modules/product/ProductView.vue'),
-    props: true,
+    props: (route) => ({ id: Number(route.params.id) }),
   },
   {
     path: '/login',

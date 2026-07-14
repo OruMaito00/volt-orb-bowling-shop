@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fakestoreApi } from '@/services/api/fakestore'
 import type { FakeStoreProduct } from '@/services/api/fakestore'
@@ -22,6 +22,9 @@ const product = ref<FakeStoreProduct | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
 const showLoginPrompt = ref(false)
+const loginPromptCancelRef = ref<HTMLButtonElement | null>(null)
+const dialogCardRef = ref<HTMLElement | null>(null)
+let lastActiveElement: HTMLElement | null = null
 
 async function fetchProduct() {
   loading.value = true
@@ -74,6 +77,45 @@ function goToLogin() {
 function goBack() {
   router.back()
 }
+
+function closeLoginPrompt() {
+  showLoginPrompt.value = false
+}
+
+watch(showLoginPrompt, (open) => {
+  if (open) {
+    lastActiveElement = document.activeElement as HTMLElement
+    nextTick(() => {
+      loginPromptCancelRef.value?.focus()
+    })
+  } else if (lastActiveElement) {
+    lastActiveElement.focus()
+    lastActiveElement = null
+  }
+})
+
+function handleDialogTab(event: KeyboardEvent) {
+  const card = dialogCardRef.value
+  if (!card) return
+  const focusables = card.querySelectorAll<HTMLElement>(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  )
+  if (focusables.length === 0) return
+  const first = focusables[0]
+  const last = focusables[focusables.length - 1]
+  const active = document.activeElement as HTMLElement
+  if (event.shiftKey) {
+    if (active === first) {
+      event.preventDefault()
+      last.focus()
+    }
+  } else {
+    if (active === last) {
+      event.preventDefault()
+      first.focus()
+    }
+  }
+}
 </script>
 
 <template>
@@ -106,13 +148,22 @@ function goBack() {
   <p v-if="loading" class="product-detail__status">Loading...</p>
   <p v-if="error" class="product-detail__error">{{ error }}</p>
 
-  <!-- Login required popup -->
-  <div v-if="showLoginPrompt" class="login-prompt" @click.self="showLoginPrompt = false">
-    <div class="login-prompt__card">
-      <p class="login-prompt__title">Login required</p>
+  <!-- Login required dialog -->
+  <div
+    v-if="showLoginPrompt"
+    class="login-prompt"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="login-prompt-title"
+    @click.self="closeLoginPrompt"
+    @keydown.escape="closeLoginPrompt"
+    @keydown.tab="handleDialogTab"
+  >
+    <div ref="dialogCardRef" class="login-prompt__card">
+      <p id="login-prompt-title" class="login-prompt__title">Login required</p>
       <p class="login-prompt__message">You need to be signed in to save items to your wishlist.</p>
       <div class="login-prompt__actions">
-        <button class="login-prompt__cancel" @click="showLoginPrompt = false">Cancel</button>
+        <button ref="loginPromptCancelRef" class="login-prompt__cancel" @click="closeLoginPrompt">Cancel</button>
         <button class="login-prompt__login" @click="goToLogin">Sign in</button>
       </div>
     </div>

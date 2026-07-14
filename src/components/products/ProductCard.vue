@@ -25,6 +25,7 @@ function addToCart() {
     tabindex="0"
     @click="goToProduct"
     @keydown.enter="goToProduct"
+    @keydown.space.prevent="goToProduct"
   >
     <div class="product-card__image">
       <img :src="product.image" :alt="product.title" loading="lazy" />

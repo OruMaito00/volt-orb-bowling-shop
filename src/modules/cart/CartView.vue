@@ -124,7 +124,8 @@ function continueShopping() {
 
 .cart-item {
   display: grid;
-  grid-template-columns: 64px 1fr auto auto auto auto;
+  grid-template-columns: 64px 1fr auto;
+  grid-template-rows: auto auto auto;
   align-items: center;
   gap: var(--spacing-md);
   background-color: var(--color-surface);
@@ -132,15 +133,20 @@ function continueShopping() {
   border-radius: var(--radius-md);
   padding: var(--spacing-sm) var(--spacing-md);
 
-  // Stack vertically on mobile
-  @media (max-width: 640px) {
-    grid-template-columns: 64px 1fr auto;
-    grid-template-rows: auto auto auto;
+  .cart-item__price,
+  .cart-item__quantity,
+  .cart-item__subtotal {
+    grid-column: 2 / -1;
+  }
+
+  @include m.respond-to('tablet') {
+    grid-template-columns: 64px 1fr auto auto auto auto;
+    grid-template-rows: auto;
 
     .cart-item__price,
     .cart-item__quantity,
     .cart-item__subtotal {
-      grid-column: 2 / -1;
+      grid-column: auto;
     }
   }
 }

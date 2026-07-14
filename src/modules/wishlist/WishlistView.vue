@@ -80,6 +80,8 @@ function continueShopping() {
 </template>
 
 <style scoped lang="scss">
+@use '@/styles/mixins' as m;
+
 .wishlist {
   padding-top: var(--spacing-lg);
 }
@@ -99,7 +101,8 @@ function continueShopping() {
 
 .wishlist-item {
   display: grid;
-  grid-template-columns: 64px 1fr auto auto;
+  grid-template-columns: 64px 1fr auto;
+  grid-template-rows: auto auto;
   align-items: center;
   gap: var(--spacing-md);
   background-color: var(--color-surface);
@@ -107,13 +110,16 @@ function continueShopping() {
   border-radius: var(--radius-md);
   padding: var(--spacing-sm) var(--spacing-md);
 
-  // Stack vertically on mobile
-  @media (max-width: 640px) {
-    grid-template-columns: 64px 1fr auto;
-    grid-template-rows: auto auto;
+  .wishlist-item__price {
+    grid-column: 2 / 3;
+  }
+
+  @include m.respond-to('tablet') {
+    grid-template-columns: 64px 1fr auto auto;
+    grid-template-rows: auto;
 
     .wishlist-item__price {
-      grid-column: 2 / 3;
+      grid-column: auto;
     }
   }
 }

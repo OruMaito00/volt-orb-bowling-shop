@@ -13,6 +13,6 @@ import Header from '@/components/layout/Header.vue'
 
 <style scoped lang="scss">
 .app-main {
-  padding-top: var(--header-height);
+  padding-bottom: var(--spacing-xl);
 }
 </style>
