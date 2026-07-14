@@ -5,6 +5,7 @@ export interface FakeStoreProduct {
   description: string
   category: string
   image: string
+  model3d?: string
 }
 
 export type Category = string

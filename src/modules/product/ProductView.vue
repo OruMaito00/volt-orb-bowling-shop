@@ -7,6 +7,7 @@ import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
 import { useAuthStore } from '@/stores/auth'
 import { isBowlingProduct } from '@/data/bowlingProducts'
+import BowlingBallViewer from '@/3d/BowlingBallViewer.vue'
 
 const props = defineProps<{
   id: number
@@ -123,7 +124,15 @@ function handleDialogTab(event: KeyboardEvent) {
     <button class="product-detail__back" @click="goBack">&larr; Back</button>
     <div class="product-detail__layout">
       <div class="product-detail__image">
-        <img :src="product.image" :alt="product.title" />
+        <BowlingBallViewer
+          v-if="product.model3d"
+          :src="product.model3d"
+          :poster="product.image"
+          :alt="product.title"
+          :camera-position="{ x: 1, y: 4.0, z: 9.0 }"
+          :camera-target="{ x: 0, y: 0, z: 0 }"
+        />
+        <img v-else :src="product.image" :alt="product.title" />
       </div>
       <div class="product-detail__info">
         <p class="product-detail__category">{{ product.category }}</p>
