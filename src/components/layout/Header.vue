@@ -292,6 +292,7 @@ function handleLogout() {
   text-decoration: none;
   background: none;
   border: none;
+  padding: var(--spacing-xs) var(--spacing-sm);
 
   &:hover {
     color: var(--color-primary);
