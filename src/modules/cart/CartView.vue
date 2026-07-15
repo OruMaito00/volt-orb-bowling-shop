@@ -212,7 +212,6 @@ function continueShopping() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-bg);
   border-radius: var(--radius-sm);
   overflow: hidden;
 

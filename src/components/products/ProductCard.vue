@@ -75,7 +75,6 @@ function addToCart() {
   align-items: center;
   justify-content: center;
   padding: var(--spacing-md);
-  background-color: var(--color-bg);
 
   img {
     max-height: 100%;

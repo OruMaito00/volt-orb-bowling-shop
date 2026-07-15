@@ -303,7 +303,7 @@ onBeforeUnmount(() => {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  background-color: var(--color-surface);
+  background-color: var(--color-3d-background);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   overflow: hidden;
