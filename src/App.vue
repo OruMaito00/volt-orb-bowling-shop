@@ -1,6 +1,21 @@
 <script setup lang="ts">
+import { onMounted, watch } from 'vue'
 import Header from '@/components/layout/Header.vue'
 import Toast from '@/components/ui/Toast.vue'
+import ErrorBanner from '@/components/ui/ErrorBanner.vue'
+import { useUiStore } from '@/stores/ui'
+import type { Theme } from '@/stores/ui'
+
+const ui = useUiStore()
+
+function applyTheme(theme: Theme) {
+  document.documentElement.setAttribute('data-theme', theme)
+}
+
+// Hydrate DOM from localStorage on first mount
+onMounted(() => applyTheme(ui.theme))
+// React to toggles from ThemeToggle
+watch(() => ui.theme, applyTheme)
 </script>
 
 <template>
@@ -15,6 +30,7 @@ import Toast from '@/components/ui/Toast.vue'
     </div>
   </main>
   <Toast />
+  <ErrorBanner />
 </template>
 
 <style scoped lang="scss">

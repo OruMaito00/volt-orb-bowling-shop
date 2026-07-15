@@ -9,6 +9,7 @@ import { useAuthStore } from '@/stores/auth'
 import { isBowlingProduct } from '@/data/bowlingProducts'
 import BowlingBallViewer from '@/3d/BowlingBallViewer.vue'
 import { showToast } from '@/composables/useToast'
+import SkeletonProductDetail from '@/components/ui/SkeletonProductDetail.vue'
 
 const props = defineProps<{
   id: number
@@ -157,7 +158,7 @@ function handleDialogTab(event: KeyboardEvent) {
       </div>
     </section>
 
-    <p v-if="loading" class="product-detail__status">Loading...</p>
+    <SkeletonProductDetail v-if="loading" />
     <p v-if="error" class="product-detail__error">{{ error }}</p>
 
     <!-- Login required dialog -->

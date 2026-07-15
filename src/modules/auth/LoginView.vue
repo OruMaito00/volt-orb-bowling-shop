@@ -3,10 +3,12 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fakestoreApi } from '@/services/api/fakestore'
 import { useAuthStore } from '@/stores/auth'
+import { useUiStore } from '@/stores/ui'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+const ui = useUiStore()
 
 const username = ref('')
 const password = ref('')
@@ -33,8 +35,14 @@ async function handleLogin() {
     auth.login(res.token, username.value)
     const redirect = (route.query.redirect as string) || '/'
     router.push(redirect)
-  } catch {
-    error.value = 'Invalid username or password'
+  } catch (e) {
+    // Distinguish API credential errors (e.g. 401) from actual network failures
+    const isApiError = e instanceof Error && e.message.startsWith('API')
+    if (isApiError) {
+      error.value = 'Invalid username or password'
+    } else {
+      ui.setError('Unable to reach the server. Please check your connection.', handleLogin)
+    }
   } finally {
     loading.value = false
   }

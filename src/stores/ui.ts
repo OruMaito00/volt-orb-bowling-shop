@@ -12,6 +12,8 @@ export const useUiStore = defineStore('ui', () => {
   const loading = ref(false)
   // Global error message (null = no error shown)
   const error = ref<string | null>(null)
+  // Retry callback stored alongside the error so ErrorBanner can offer a retry action
+  const retryHandler = ref<(() => void) | null>(null)
   // Generic modal visibility flag (extend with specific flags when Phase 2 adds modals)
   const isModalOpen = ref(false)
 
@@ -21,14 +23,22 @@ export const useUiStore = defineStore('ui', () => {
     localStorage.setItem('ui_theme', newTheme)
   }
 
-  // Sets a global error message (shows ErrorBanner when wired in Phase 2)
-  function setError(message: string | null) {
+  // Sets a global error message and optionally stores a retry callback
+  function setError(message: string | null, retryFn?: () => void) {
     error.value = message
+    retryHandler.value = retryFn ?? null
   }
 
   // Convenience: quickly clear any active error
   function clearError() {
     error.value = null
+    retryHandler.value = null
+  }
+
+  // Invokes the stored retry callback if one exists, then clears the error
+  function retry() {
+    retryHandler.value?.()
+    clearError()
   }
 
   // Controls the global loading flag
@@ -41,5 +51,5 @@ export const useUiStore = defineStore('ui', () => {
     isModalOpen.value = value
   }
 
-  return { theme, loading, error, isModalOpen, setTheme, setError, clearError, setLoading, setModalOpen }
+  return { theme, loading, error, retryHandler, isModalOpen, setTheme, setError, clearError, retry, setLoading, setModalOpen }
 })

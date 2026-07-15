@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import type { FakeStoreProduct, Category } from '@/services/api/fakestore'
 import { fakestoreApi } from '@/services/api/fakestore'
 import { bowlingProducts, BOWLING_CATEGORY } from '@/data/bowlingProducts'
+import { useUiStore } from '@/stores/ui'
 
 export const useProductsStore = defineStore('products', () => {
   // Product list shown on the home grid
@@ -15,6 +16,9 @@ export const useProductsStore = defineStore('products', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
+  // Wire global error banner so users get a retry button on fetch failures
+  const ui = useUiStore()
+
   // Fetches API categories and injects our local bowling category
   async function fetchCategories() {
     loading.value = true
@@ -24,6 +28,7 @@ export const useProductsStore = defineStore('products', () => {
       categories.value = [...apiCategories, BOWLING_CATEGORY]
     } catch {
       error.value = 'Failed to load categories'
+      ui.setError('Failed to load categories', fetchCategories)
     } finally {
       loading.value = false
     }
@@ -38,6 +43,7 @@ export const useProductsStore = defineStore('products', () => {
       products.value = [...bowlingProducts, ...apiProducts]
     } catch {
       error.value = 'Failed to load products'
+      ui.setError('Failed to load products', fetchProducts)
     } finally {
       loading.value = false
     }
@@ -56,6 +62,7 @@ export const useProductsStore = defineStore('products', () => {
       products.value = await fakestoreApi.getProductsByCategory(cat)
     } catch {
       error.value = 'Failed to load products for category'
+      ui.setError('Failed to load products for category', () => fetchProductsByCategory(cat))
     } finally {
       loading.value = false
     }

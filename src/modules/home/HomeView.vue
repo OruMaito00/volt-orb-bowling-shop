@@ -3,6 +3,7 @@ import { onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductsStore } from '@/stores/products'
 import ProductCard from '@/components/products/ProductCard.vue'
+import SkeletonCard from '@/components/ui/SkeletonCard.vue'
 
 const route = useRoute()
 const products = useProductsStore()
@@ -46,9 +47,11 @@ watch(() => route.query.category, load)
           />
         </div>
       </div>
+      <div v-else class="home__grid" key="skeleton">
+        <SkeletonCard v-for="i in 6" :key="i" />
+      </div>
     </Transition>
 
-    <p v-if="products.loading" class="home__status">Loading products...</p>
     <p v-if="products.error" class="home__error">{{ products.error }}</p>
     <p
       v-if="!products.loading && products.products.length === 0 && !products.error"

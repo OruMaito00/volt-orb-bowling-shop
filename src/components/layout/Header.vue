@@ -5,6 +5,7 @@ import { useProductsStore } from '@/stores/products'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import CategoryTabs from '@/components/ui/CategoryTabs.vue'
+import ThemeToggle from '@/components/ui/ThemeToggle.vue'
 import type { Category } from '@/services/api/fakestore'
 
 const route = useRoute()
@@ -76,6 +77,8 @@ function handleLogout() {
 
       <!-- Right side actions -->
       <nav class="header__actions" aria-label="Account and cart">
+        <ThemeToggle />
+
         <!-- Mobile hamburger -->
         <button
           class="header__hamburger"
