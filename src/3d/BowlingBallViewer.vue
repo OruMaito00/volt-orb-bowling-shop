@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
@@ -18,7 +18,7 @@ const props = defineProps<{
 }>()
 
 const containerRef = ref<HTMLDivElement | null>(null)
-const showPoster = ref(false)   // 2D photo only shown if 3D fails
+const showPoster = ref(true)   // 2D photo shows until the model is ready, or as fallback if 3D fails
 const showHint = ref(false)     // "Drag to rotate" hint
 const showFallback = ref(false) // true = WebGL missing or model load failed
 
@@ -30,6 +30,35 @@ let controls: OrbitControls | null = null
 let animationId: number | null = null
 let resizeObserver: ResizeObserver | null = null
 let disposed = false // guard so async callbacks can't write to a torn-down scene
+let modelRoot: THREE.Object3D | null = null // current GLB root, tracked so we can remove it on prop change
+
+// When the model URL changes (e.g. navigating between bowling balls
+// via the "You may also like" carousel), swap the 3D model in-place.
+watch(
+  () => props.src,
+  (newSrc, oldSrc) => {
+    if (newSrc !== oldSrc) swapModel()
+  }
+)
+
+function swapModel() {
+  if (disposed) return
+
+  // Remove + dispose the previous model
+  if (modelRoot && scene) {
+    scene.remove(modelRoot)
+    modelRoot.traverse(disposeObject)
+    modelRoot = null
+  }
+
+  // Reset UI state for the new load
+  showPoster.value = true
+  showFallback.value = false
+  showHint.value = false
+
+  // Load the new GLB
+  loadModel()
+}
 
 onMounted(() => {
   if (!containerRef.value) return
@@ -172,14 +201,16 @@ function loadModel() {
       }
       controls!.update()
 
+      modelRoot = model
       scene!.add(model)
-      showPoster.value = false // redundant (already false) — keeps the intent explicit
+      showPoster.value = false // model ready — hide the 2D placeholder
       showHint.value = true
     },
     undefined,
     (err) => {
       if (disposed) return
       console.error('BowlingBallViewer: model load failed', err)
+      modelRoot = null
       showFallback.value = true
     },
   )
@@ -233,7 +264,11 @@ onBeforeUnmount(() => {
     controls = null
   }
   if (scene) {
-    scene.traverse(disposeObject)
+    if (modelRoot) {
+      scene.remove(modelRoot)
+      modelRoot.traverse(disposeObject)
+      modelRoot = null
+    }
     const env = scene.environment
     if (env && 'dispose' in env) (env as THREE.Texture).dispose()
     scene = null
@@ -250,7 +285,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div ref="containerRef" class="ball-viewer">
-    <!-- 2D photo only renders as a fallback (showPoster is reserved for future use) -->
+    <!-- 2D photo shows while the 3D model loads, or as a fallback if it fails -->
     <img
       v-if="showPoster || showFallback"
       :src="poster"

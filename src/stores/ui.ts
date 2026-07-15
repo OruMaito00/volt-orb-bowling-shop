@@ -35,10 +35,12 @@ export const useUiStore = defineStore('ui', () => {
     retryHandler.value = null
   }
 
-  // Invokes the stored retry callback if one exists, then clears the error
-  function retry() {
-    retryHandler.value?.()
+  // Clears the error first so the loading state can take over, then awaits the
+  // stored retry callback. On failure the store's catch re-shows the banner.
+  async function retry() {
+    const handler = retryHandler.value
     clearError()
+    await handler?.()
   }
 
   // Controls the global loading flag

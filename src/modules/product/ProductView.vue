@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, nextTick } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fakestoreApi } from '@/services/api/fakestore'
 import type { FakeStoreProduct } from '@/services/api/fakestore'
@@ -9,6 +9,8 @@ import { useAuthStore } from '@/stores/auth'
 import { isBowlingProduct } from '@/data/bowlingProducts'
 import BowlingBallViewer from '@/3d/BowlingBallViewer.vue'
 import { showToast } from '@/composables/useToast'
+import { useProductsStore } from '@/stores/products'
+import ProductCard from '@/components/products/ProductCard.vue'
 import SkeletonProductDetail from '@/components/ui/SkeletonProductDetail.vue'
 
 const props = defineProps<{
@@ -29,18 +31,51 @@ const loginPromptCancelRef = ref<HTMLButtonElement | null>(null)
 const dialogCardRef = ref<HTMLElement | null>(null)
 let lastActiveElement: HTMLElement | null = null
 
+const products = useProductsStore()
+const relatedContainerRef = ref<HTMLDivElement | null>(null)
+const showArrows = ref(false)
+
+const relatedProducts = computed(() => {
+  if (!product.value) return []
+  return products.products
+    .filter((p) => p.category === product.value!.category && p.id !== product.value!.id)
+    .slice(0, 8)
+})
+
+async function ensureProductsLoaded() {
+  if (products.products.length === 0 && !products.loading) {
+    await products.fetchProducts()
+  }
+}
+
+function checkArrows() {
+  const el = relatedContainerRef.value
+  if (!el) return
+  showArrows.value = el.scrollWidth > el.clientWidth
+}
+
+function scrollRelated(direction: number) {
+  const el = relatedContainerRef.value
+  if (!el) return
+  const scrollAmount = el.clientWidth * 0.85
+  el.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' })
+}
+
 async function fetchProduct() {
   loading.value = true
   error.value = null
+  product.value = null
   try {
     // Check local bowling products first — instant, no API call
     const local = isBowlingProduct(props.id)
     if (local) {
       product.value = local
-      return
+    } else {
+      // Not a bowling product — fetch from the API
+      product.value = await fakestoreApi.getProduct(props.id)
     }
-    // Not a bowling product — fetch from the API
-    product.value = await fakestoreApi.getProduct(props.id)
+    // Fire off a background fetch so related products populate
+    ensureProductsLoaded().catch(() => {})
   } catch {
     error.value = 'Failed to load product'
   } finally {
@@ -48,11 +83,31 @@ async function fetchProduct() {
   }
 }
 
-onMounted(fetchProduct)
+onMounted(() => {
+  window.addEventListener('resize', checkArrows)
+  fetchProduct()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkArrows)
+})
 
 // Router reuses the same component for /products/1 → /products/2
 // so we watch the id prop and re-fetch when it changes
 watch(() => props.id, fetchProduct)
+
+// When the product changes, make sure the global catalog is loaded
+// so the "You may also like" section can populate
+watch(() => product.value, (p) => {
+  if (p) {
+    ensureProductsLoaded().then(() => nextTick(checkArrows))
+  }
+})
+
+// Recalculate arrow visibility whenever the product list changes
+watch(() => products.products, () => {
+  nextTick(checkArrows)
+})
 
 function addToCart() {
   if (product.value) {
@@ -155,6 +210,45 @@ function handleDialogTab(event: KeyboardEvent) {
             </button>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- Related products — same category, excluding the current item -->
+    <section
+      v-if="product && (products.loading || relatedProducts.length > 0)"
+      class="related-products"
+    >
+      <h2 class="related-products__title">You may also like</h2>
+
+      <div v-if="products.loading" class="related-products__scroll">
+        <div v-for="n in 3" :key="n" class="related-products__skeleton skeleton"></div>
+      </div>
+
+      <div v-else-if="relatedProducts.length > 0" class="related-products__wrapper">
+        <button
+          v-if="showArrows"
+          class="related-products__arrow related-products__arrow--prev"
+          aria-label="Scroll related products left"
+          @click="scrollRelated(-1)"
+        >
+          &larr;
+        </button>
+        <div ref="relatedContainerRef" class="related-products__scroll">
+          <ProductCard
+            v-for="related in relatedProducts"
+            :key="related.id"
+            :product="related"
+            class="related-products__card"
+          />
+        </div>
+        <button
+          v-if="showArrows"
+          class="related-products__arrow related-products__arrow--next"
+          aria-label="Scroll related products right"
+          @click="scrollRelated(1)"
+        >
+          &rarr;
+        </button>
       </div>
     </section>
 
@@ -436,6 +530,93 @@ function handleDialogTab(event: KeyboardEvent) {
   &:focus-visible {
     outline: 2px solid var(--color-focus);
     outline-offset: 2px;
+  }
+}
+
+// ── Related products carousel ───────────────────────────────────────────────
+
+.related-products {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-xl);
+  border-top: 1px solid var(--color-border);
+}
+
+.related-products__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+}
+
+.related-products__wrapper {
+  position: relative;
+}
+
+.related-products__scroll {
+  display: flex;
+  gap: var(--spacing-md);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--spacing-sm) 0;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.related-products__card {
+  flex: 0 0 220px;
+  scroll-snap-align: start;
+}
+
+.related-products__skeleton {
+  flex: 0 0 220px;
+  height: 280px;
+  border-radius: var(--radius-md);
+}
+
+.related-products__arrow {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  @include m.respond-to('desktop') {
+    display: flex;
+  }
+
+  &--prev {
+    left: -1rem;
+  }
+
+  &--next {
+    right: -1rem;
   }
 }
 </style>

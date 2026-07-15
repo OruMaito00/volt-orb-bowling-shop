@@ -3,6 +3,7 @@ import { onMounted, watch } from 'vue'
 import Header from '@/components/layout/Header.vue'
 import Toast from '@/components/ui/Toast.vue'
 import ErrorBanner from '@/components/ui/ErrorBanner.vue'
+import CartFab from '@/components/ui/CartFab.vue'
 import { useUiStore } from '@/stores/ui'
 import type { Theme } from '@/stores/ui'
 
@@ -31,6 +32,7 @@ watch(() => ui.theme, applyTheme)
   </main>
   <Toast />
   <ErrorBanner />
+  <CartFab />
 </template>
 
 <style scoped lang="scss">

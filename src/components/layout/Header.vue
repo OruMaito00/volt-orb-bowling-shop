@@ -2,8 +2,9 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductsStore } from '@/stores/products'
-import { useCartStore } from '@/stores/cart'
+
 import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
 import CategoryTabs from '@/components/ui/CategoryTabs.vue'
 import ThemeToggle from '@/components/ui/ThemeToggle.vue'
 import type { Category } from '@/services/api/fakestore'
@@ -11,8 +12,8 @@ import type { Category } from '@/services/api/fakestore'
 const route = useRoute()
 const router = useRouter()
 const products = useProductsStore()
-const cart = useCartStore()
 const auth = useAuthStore()
+const cart = useCartStore()
 
 const isMenuOpen = ref(false)
 const cartPulsing = ref(false)
@@ -76,7 +77,7 @@ function handleLogout() {
       />
 
       <!-- Right side actions -->
-      <nav class="header__actions" aria-label="Account and cart">
+        <nav class="header__actions" aria-label="Account and cart">
         <ThemeToggle />
 
         <!-- Mobile hamburger -->
@@ -89,7 +90,7 @@ function handleLogout() {
           ☰
         </button>
 
-        <!-- Cart with counter badge -->
+        <!-- Cart — desktop only (mobile uses the floating action button) -->
         <router-link to="/cart" class="header__cart" aria-label="Shopping cart">
           🛒
           <span class="header__cart-count" :class="{ 'is-pulsing': cartPulsing }">{{ cart.itemCount }}</span>
@@ -203,14 +204,18 @@ function handleLogout() {
   }
 }
 
-// Cart
+// Cart — hidden on mobile (FAB handles it), visible on desktop
 .header__cart {
+  display: none;
   position: relative;
   text-decoration: none;
   font-size: 1.25rem;
   color: var(--color-text);
-  display: flex;
   align-items: center;
+
+  @include m.respond-to('desktop') {
+    display: flex;
+  }
 
   &:hover {
     text-decoration: none;

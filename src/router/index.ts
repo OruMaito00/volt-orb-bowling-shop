@@ -35,6 +35,11 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/modules/wishlist/WishlistView.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: () => import('@/modules/NotFound.vue'),
+  },
 ]
 
 const router = createRouter({
