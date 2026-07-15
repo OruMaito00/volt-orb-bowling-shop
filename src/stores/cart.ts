@@ -44,11 +44,57 @@ export const useCartStore = defineStore('cart', () => {
     persist()
   }
 
+  // Updates an item's quantity (removes it if quantity drops to 0 or below)
+  function updateQuantity(productId: number, quantity: number) {
+    const existing = items.value.find((item) => item.productId === productId)
+    if (!existing) return
+
+    if (quantity <= 0) {
+      removeFromCart(productId)
+      return
+    }
+
+    existing.quantity = quantity
+    persist()
+  }
+
+  // Increments an item's quantity by 1
+  function incrementQuantity(productId: number) {
+    const existing = items.value.find((item) => item.productId === productId)
+    if (existing) {
+      existing.quantity++
+      persist()
+    }
+  }
+
+  // Decrements an item's quantity by 1 (removes it if it reaches 0)
+  function decrementQuantity(productId: number) {
+    const existing = items.value.find((item) => item.productId === productId)
+    if (!existing) return
+
+    if (existing.quantity <= 1) {
+      removeFromCart(productId)
+    } else {
+      existing.quantity--
+      persist()
+    }
+  }
+
   // Empties the cart
   function clearCart() {
     items.value = []
     persist()
   }
 
-  return { items, itemCount, totalPrice, addToCart, removeFromCart, clearCart }
+  return {
+    items,
+    itemCount,
+    totalPrice,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    incrementQuantity,
+    decrementQuantity,
+    clearCart,
+  }
 })

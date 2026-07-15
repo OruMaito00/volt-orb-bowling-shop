@@ -22,6 +22,14 @@ function removeItem(productId: number) {
   cart.removeFromCart(productId)
 }
 
+function increaseQuantity(productId: number) {
+  cart.incrementQuantity(productId)
+}
+
+function decreaseQuantity(productId: number) {
+  cart.decrementQuantity(productId)
+}
+
 function clearCart() {
   cart.clearCart()
 }
@@ -67,6 +75,16 @@ function continueShopping() {
           :key="item.productId"
           class="cart-item"
         >
+          <button
+            class="cart-item__remove"
+            @click="removeItem(item.productId)"
+            aria-label="Remove item"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+              <path d="M4 4l8 8M12 4l-8 8"/>
+            </svg>
+          </button>
+
           <div class="cart-item__image">
             <img
               v-if="resolved.get(item.productId)"
@@ -74,20 +92,30 @@ function continueShopping() {
               :alt="resolved.get(item.productId)!.title"
             />
           </div>
+
           <div class="cart-item__info">
             <div class="cart-item__name">{{ resolved.get(item.productId)?.title ?? 'Loading...' }}</div>
             <div class="cart-item__category">{{ resolved.get(item.productId)?.category ?? '' }}</div>
           </div>
-          <div class="cart-item__price">${{ item.price.toFixed(2) }}</div>
-          <div class="cart-item__quantity">Qty: {{ item.quantity }}</div>
-          <div class="cart-item__subtotal">${{ (item.price * item.quantity).toFixed(2) }}</div>
-          <button
-            class="cart-item__remove"
-            @click="removeItem(item.productId)"
-            aria-label="Remove item"
-          >
-            Remove
-          </button>
+
+            <div class="cart-item__subtotal">${{ (item.price * item.quantity).toFixed(2) }}</div>
+            <div class="cart-item__quantity" aria-label="Quantity controls">
+              <button
+                class="cart-item__qty-btn"
+                @click="decreaseQuantity(item.productId)"
+                aria-label="Decrease quantity"
+              >
+                &minus;
+              </button>
+              <span class="cart-item__qty-value" aria-live="polite">{{ item.quantity }}</span>
+              <button
+                class="cart-item__qty-btn"
+                @click="increaseQuantity(item.productId)"
+                aria-label="Increase quantity"
+              >
+                &plus;
+              </button>
+            </div>
         </div>
       </TransitionGroup>
 
@@ -133,31 +161,48 @@ function continueShopping() {
 }
 
 .cart-item {
+  position: relative;
   display: grid;
-  grid-template-columns: 64px 1fr auto;
-  grid-template-rows: auto auto auto;
+  grid-template-columns: 64px 1fr;
+  grid-template-rows: auto auto;
   align-items: center;
-  gap: var(--spacing-md);
+  justify-items: end;
+  gap: var(--spacing-xs) var(--spacing-md);
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md);
+  padding-top: calc(var(--spacing-md) + 0.25rem);
 
-  .cart-item__price,
-  .cart-item__quantity,
-  .cart-item__subtotal {
-    grid-column: 2 / -1;
+  // Product name/category stay left-aligned for readability while the rest
+  // of the cart-item uses justify-items: end on mobile.
+  .cart-item__info {
+    justify-self: start;
+    grid-column: 2;
+    grid-row: 1;
   }
 
-  @include m.respond-to('tablet') {
-    grid-template-columns: 64px 1fr auto auto auto auto;
-    grid-template-rows: auto;
+  .cart-item__image {
+    grid-column: 1;
+    grid-row: 1;
+  }
 
-    .cart-item__price,
-    .cart-item__quantity,
-    .cart-item__subtotal {
-      grid-column: auto;
+
+  @include m.respond-to('tablet') {
+    grid-template-columns: 64px 1fr auto;
+    grid-template-rows: auto;
+    justify-items: normal;
+    gap: var(--spacing-md);
+
+    .cart-item__info {
+      grid-column: 2;
+      grid-row: 1;
     }
+
+    .cart-item__image {
+      grid-row: 1;
+    }
+
   }
 }
 
@@ -194,16 +239,51 @@ function continueShopping() {
   text-transform: capitalize;
 }
 
-.cart-item__price {
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-  white-space: nowrap;
-}
-
 .cart-item__quantity {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
   font-size: 0.875rem;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.cart-item__qty-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+
+  &:hover {
+    border-color: var(--color-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.cart-item__qty-value {
+  display: inline-block;
+  min-width: 1.5rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
 .cart-item__subtotal {
@@ -214,20 +294,35 @@ function continueShopping() {
 }
 
 .cart-item__remove {
+  position: absolute;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
+  border-radius: none;
   color: var(--color-text-muted);
-  font-size: 0.75rem;
-  padding: var(--spacing-xs);
-  transition: color var(--duration-fast) var(--ease-standard);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
 
   &:hover {
     color: var(--color-primary);
+    border-color: var(--color-primary);
   }
 
   &:focus-visible {
     outline: 2px solid var(--color-focus);
     outline-offset: 2px;
+  }
+
+  &:active {
+    transform: scale(0.97);
   }
 }
 
