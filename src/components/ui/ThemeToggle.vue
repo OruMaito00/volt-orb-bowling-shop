@@ -22,11 +22,16 @@ function toggleTheme() {
 
 <style scoped lang="scss">
 .theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
   font-size: 1.25rem;
   background: none;
   border: none;
   color: var(--color-text);
-  padding: var(--spacing-xs);
+  padding: 0;
   line-height: 1;
   cursor: pointer;
   transition: color var(--duration-fast) var(--ease-standard);

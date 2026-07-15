@@ -174,8 +174,6 @@ function continueShopping() {
   padding: var(--spacing-md);
   padding-top: calc(var(--spacing-md) + 0.25rem);
 
-  // Product name/category stay left-aligned for readability while the rest
-  // of the cart-item uses justify-items: end on mobile.
   .cart-item__info {
     justify-self: start;
     grid-column: 2;
@@ -185,24 +183,6 @@ function continueShopping() {
   .cart-item__image {
     grid-column: 1;
     grid-row: 1;
-  }
-
-
-  @include m.respond-to('tablet') {
-    grid-template-columns: 64px 1fr auto;
-    grid-template-rows: auto;
-    justify-items: normal;
-    gap: var(--spacing-md);
-
-    .cart-item__info {
-      grid-column: 2;
-      grid-row: 1;
-    }
-
-    .cart-item__image {
-      grid-row: 1;
-    }
-
   }
 }
 
@@ -230,12 +210,20 @@ function continueShopping() {
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.3;
+
+  @include m.respond-to('tablet') {
+    font-size: 1rem;
+  }
 }
 
 .cart-item__category {
   font-size: 0.75rem;
   color: var(--color-text-muted);
   text-transform: capitalize;
+
+  @include m.respond-to('tablet') {
+    font-size: 0.875rem;
+  }
 }
 
 .cart-item__quantity {
@@ -245,6 +233,10 @@ function continueShopping() {
   font-size: 0.875rem;
   font-weight: 600;
   white-space: nowrap;
+
+  @include m.respond-to('tablet') {
+    font-size: 1rem;
+  }
 }
 
 .cart-item__qty-btn {
@@ -276,6 +268,10 @@ function continueShopping() {
   &:active {
     transform: scale(0.97);
   }
+
+  @include m.respond-to('tablet') {
+    font-size: 1.125rem;
+  }
 }
 
 .cart-item__qty-value {
@@ -290,6 +286,10 @@ function continueShopping() {
   font-weight: 700;
   color: var(--color-primary);
   white-space: nowrap;
+
+  @include m.respond-to('tablet') {
+    font-size: 1rem;
+  }
 }
 
 .cart-item__remove {

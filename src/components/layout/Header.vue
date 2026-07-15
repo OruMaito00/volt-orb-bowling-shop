@@ -58,15 +58,27 @@ function handleLogout() {
 <template>
   <header class="header">
     <div class="container header__inner">
-      <!-- Brand: logo + name -->
-      <router-link to="/" class="header__brand">
-        <img
-          src="/logo/voltorb-logo.webp"
-          alt="Volt-Orb Bowling Shop logo"
-          class="header__logo"
-        />
-        <span class="header__name">Volt-Orb Bowling Shop</span>
-      </router-link>
+      <div class="header__start">
+        <!-- Mobile hamburger -->
+        <button
+          class="header__hamburger"
+          :aria-expanded="isMenuOpen"
+          aria-label="Toggle category menu"
+          @click="isMenuOpen = !isMenuOpen"
+        >
+          ☰
+        </button>
+
+        <!-- Brand: logo + name -->
+        <router-link to="/" class="header__brand">
+          <img
+            src="/logo/voltorb-logo.webp"
+            alt="Volt-Orb Bowling Shop logo"
+            class="header__logo"
+          />
+          <span class="header__name">Volt-Orb Bowling Shop</span>
+        </router-link>
+      </div>
 
       <!-- Desktop category nav (hidden on mobile) -->
       <CategoryTabs
@@ -77,18 +89,8 @@ function handleLogout() {
       />
 
       <!-- Right side actions -->
-        <nav class="header__actions" aria-label="Account and cart">
+      <nav class="header__actions" aria-label="Account and cart">
         <ThemeToggle />
-
-        <!-- Mobile hamburger -->
-        <button
-          class="header__hamburger"
-          :aria-expanded="isMenuOpen"
-          aria-label="Toggle category menu"
-          @click="isMenuOpen = !isMenuOpen"
-        >
-          ☰
-        </button>
 
         <!-- Cart — desktop only (mobile uses the floating action button) -->
         <router-link to="/cart" class="header__cart" aria-label="Shopping cart">
@@ -166,8 +168,16 @@ function handleLogout() {
 
 .header__name {
   font-weight: 700;
-  font-size: 1.125rem;
+  font-size: 0.875rem;
   white-space: nowrap;
+
+  @include m.respond-to('tablet') {
+    font-size: 1rem;
+  }
+
+  @include m.respond-to('desktop') {
+    font-size: 1.125rem;
+  }
 
   // Hide the name on very small screens to save space
   @media (max-width: 400px) {
@@ -186,13 +196,27 @@ function handleLogout() {
 .header__actions {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xxs);
   flex-shrink: 0;
+  padding-right: var(--spacing-sm);
+
+  @include m.respond-to('desktop') {
+    gap: var(--spacing-sm);
+    padding-right: var(--spacing-xs);
+  }
+}
+
+.header__start {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 // Hamburger — visible on mobile, hidden on desktop
 .header__hamburger {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.25rem;
   background: none;
   border: none;
@@ -246,6 +270,11 @@ function handleLogout() {
 
 // Auth links
 .header__heart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
   font-size: 1.25rem;
   color: var(--color-text);
   text-decoration: none;
