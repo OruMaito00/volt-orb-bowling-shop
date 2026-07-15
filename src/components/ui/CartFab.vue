@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 
 const cart = useCartStore()
+const route = useRoute()
 const cartPulsing = ref(false)
+
+const isCartPage = computed(() => route.path === '/cart')
 
 watch(() => cart.itemCount, (newCount, oldCount) => {
   if (newCount > (oldCount ?? 0)) {
@@ -17,6 +21,7 @@ watch(() => cart.itemCount, (newCount, oldCount) => {
 
 <template>
   <router-link
+    v-if="!isCartPage"
     to="/cart"
     class="cart-fab"
     aria-label="Shopping cart"

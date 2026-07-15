@@ -93,7 +93,7 @@ function handleLogout() {
         <ThemeToggle />
 
         <!-- Cart — desktop only (mobile uses the floating action button) -->
-        <router-link to="/cart" class="header__cart" aria-label="Shopping cart">
+        <router-link to="/cart" class="header__cart" aria-label="Shopping cart" router-link-active="false">
           🛒
           <span class="header__cart-count" :class="{ 'is-pulsing': cartPulsing }">{{ cart.itemCount }}</span>
         </router-link>
@@ -179,8 +179,8 @@ function handleLogout() {
     font-size: 1.125rem;
   }
 
-  // Hide the name on very small screens to save space
-  @media (max-width: 400px) {
+  // Hide the name when category tabs are visible to give them more room
+  @media (max-width: 1199px) {
     display: none;
   }
 }
